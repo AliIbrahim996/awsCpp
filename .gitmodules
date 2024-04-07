@@ -1,0 +1,4 @@
+[submodule "submodules/cmakeHelper"]
+	path = submodules/cmakeHelper
+	url = https://github.com/AliIbrahim996/cmakeHelper.git
+	branch = develop
