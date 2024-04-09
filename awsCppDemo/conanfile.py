@@ -1,5 +1,5 @@
 from conan import ConanFile
-from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout, CMakeDeps
+from conan.tools.cmake import CMake, cmake_layout
 
 class AwsCppConan(ConanFile):
     name = "AwsCppDemo"
@@ -12,33 +12,25 @@ class AwsCppConan(ConanFile):
 
     # Binary configuration
     settings = "os", "compiler", "build_type", "arch"
+    generators = "CMakeDeps", "CMakeToolchain"
     options = {"shared": [True, False]}
     default_options = {"shared": False}
-    generators = "cmake", "visual_studio"
     # Sources are located in the same place as this recipe, copy them to the recipe
     exports_sources = "CMakeLists.txt", "src/*", "include/*"
-    default_options = {"shared": False, "fPIC": True}
-
-    def build_requirements(self):
-        self.build_requires("cmake/3.23.2")
-        self.build_requires("doxygen/1.9.4")
-        self.build_requires("gtest/cci.20210126")
-
-    def config_options(self):
-        if self.settings.os == "Windows":
-            del self.options.fPIC
-
+    
+    def requirements(self):
+        self.requires("aws-sdk-cpp/1.9.234")
+        self.requires("ninja/1.11.1")
+        
     def layout(self):
         cmake_layout(self)
-
-    def generate(self):
-        deps = CMakeDeps(self)
-        deps.generate()
-        tc = CMakeToolchain(self)
-        tc.generate()
-
+    
     def build(self):
         cmake = CMake(self)
+        if self.settings.compiler == "Visual Studio":
+            cmake.generator = "Visual Studio 17 2022"
+        else:
+            cmake.generator = "Ninja"
         cmake.configure()
         cmake.build()
 
@@ -49,8 +41,6 @@ class AwsCppConan(ConanFile):
         self.copy("*.dylib*", dst="lib", keep_path=False)
         self.copy("*.so", dst="lib", keep_path=False)
         self.copy("*.a", dst="lib", keep_path=False)
-        cmake = CMake(self)
-        cmake.install()
 
     def package_info(self):
         self.cpp_info.libs = ["AwsCppDemo"]

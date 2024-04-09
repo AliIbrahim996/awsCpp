@@ -1,19 +1,28 @@
 cmake_minimum_required(VERSION 3.2)
 
-include(${CMAKE_CURRENT_BINARY_DIR}/conanbuildinfo.cmake)
-conan_basic_setup(TARGETS)
+project(AwsCppDemo)
 
-### Static Library ###
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED True)
+include(set_dirs.cmake)
+include(include_directories.cmake)
 
-include("../../submodules/cmakeHelper/libTemplates.cmake")
+# Find AWSSDK
+find_package(AWSSDK REQUIRED)
 
-FILE(GLOB_RECURSE HEADERS include/*.h include/*.hpp)
-FILE(GLOB_RECURSE SOURCES src/*.cpp src/*.h src/*.hpp)
+# Source files
+file(GLOB_RECURSE SOURCES "src/*.cpp")
+file(GLOB_RECURSE HEADERS "include/*.h" "include/*.hpp")
 
-generate_default_lib_target(SOURCES ${HEADERS} ${SOURCES})
+# Add executable
+add_executable(${PROJECT_NAME} main.cpp ${SOURCES} ${HEADERS})
+set_target_properties(${PROJECT_NAME} PROPERTIES
+                      CXX_STANDARD 17
+                      CXX_STANDARD_REQUIRED ON)
 
-# include-directories (for usage with '<>')
-target_include_directories(${CONAN_PACKAGE_NAME} PRIVATE src include PUBLIC include)
+# Include directories
+target_include_directories(${PROJECT_NAME} PRIVATE "include")
+set_include_directories_for_target(${PROJECT_NAME})
 
-# settings for IDE-visualisation
-source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} FILES ${SOURCES} ${HEADERS})
+# Link libraries
+target_link_libraries(${PROJECT_NAME} PRIVATE ${AWSSDK_LIBRARIES})

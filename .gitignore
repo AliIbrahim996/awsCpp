@@ -1,4 +1,6 @@
-*build*
+build/
 *venv*
-vs
-.vscod
+vs/
+*vscod*
+*lib*
+*CMakeUserPresets*
